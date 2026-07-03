@@ -1,4 +1,4 @@
-/// TS  MP4 converter.
+/// TSMP4 converter.
 ///
 /// Pure Rust remuxer:
 /// - Demux: `mpeg2ts` (TS packets â†? PES packets).
