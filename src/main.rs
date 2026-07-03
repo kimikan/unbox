@@ -16,7 +16,7 @@ fn main() -> eframe::Result<()> {
   };
 
   eframe::run_native(
-    "Unbox — DSSAD Data Converter",
+    "Unbox DSSAD Data Converter",
     options,
     Box::new(|cc| Ok(Box::new(app::UnboxApp::new(cc)))),
   )
