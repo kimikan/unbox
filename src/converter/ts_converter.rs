@@ -1,11 +1,11 @@
-/// TS â†? MP4 converter.
+/// TS  MP4 converter.
 ///
 /// Pure Rust remuxer:
-/// - Demux: `mpeg2ts` (TS packets â†? PES packets).
+/// - Demux: `mpeg2ts` (TS packets Ã¢â€ ? PES packets).
 /// - Mux: `muxide` (pure-Rust MP4 muxer with proper H.264/H.265 support).
 ///
 /// Handles both AVC (H.264) and HEVC (H.265) elementary streams. Audio is
-/// currently ignored â€? DSSAD TS clips are video-only.
+/// currently ignored DSSAD TS clips are video-only.
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
@@ -46,7 +46,7 @@ struct Frame {
   has_param_sets: bool,
 }
 
-/// Pure Rust TS â†? MP4 remuxer.
+/// Pure Rust TS MP4 remuxer.
 pub fn convert(src: &Path, dst: &Path) -> Result<(), String> {
   // 1. Scan PMT to determine video PID + codec.
   let (video_pid, codec) = scan_video_track(src)?;
@@ -56,7 +56,7 @@ pub fn convert(src: &Path, dst: &Path) -> Result<(), String> {
   let ts_reader = TsPacketReader::new(BufReader::new(src_file));
   let mut pes_reader = PesPacketReader::new(ts_reader);
 
-  // Cached parameter sets â€? used to prepend to the first keyframe if the
+  // Cached parameter sets  used to prepend to the first keyframe if the
   // stream doesn't inline them alongside the IDR.
   let mut cached_params: Vec<Vec<u8>> = Vec::new();
   let mut frames: Vec<Frame> = Vec::new();
@@ -71,7 +71,7 @@ pub fn convert(src: &Path, dst: &Path) -> Result<(), String> {
     // We can't tell the PID from PES header alone; PesPacketReader hides it.
     // Fortunately in TS files with a single video track the video PID equals
     // the only PID producing video-range stream IDs. If there are multiple,
-    // we'd need to walk raw TS packets â€? deferred.
+    // we'd need to walk raw TS packets deferred.
     let _ = video_pid; // reserved for future multi-PID handling
 
     let Some(pts_ts) = pes.header.pts else {
@@ -310,7 +310,7 @@ fn ebsp_to_rbsp(ebsp: &[u8]) -> Vec<u8> {
   out
 }
 
-/// Minimal H.264 SPS parser â†? (width, height).
+/// Minimal H.264 SPS parser (width, height).
 fn parse_h264_sps_resolution(sps: &[u8]) -> Option<(u16, u16)> {
   if sps.len() < 4 {
     return None;
@@ -401,7 +401,7 @@ fn parse_h264_sps_resolution(sps: &[u8]) -> Option<(u16, u16)> {
   ))
 }
 
-/// Minimal HEVC SPS parser â†? (width, height). Handles the header up to
+/// Minimal HEVC SPS parser (width, height). Handles the header up to
 /// `pic_width_in_luma_samples` / `pic_height_in_luma_samples` and the
 /// conformance window crop.
 fn parse_hevc_sps_resolution(sps: &[u8]) -> Option<(u16, u16)> {
@@ -468,7 +468,7 @@ fn skip_profile_tier_level(r: &mut BitReader<'_>, max_sub_layers_minus1: u32) ->
   }
   if n > 0 {
     // Alignment: 2 * (8 - n) reserved zero bits, per spec (rounded up to
-    // the next byte boundary â€? that's 8*(8-n) bits when n<8).
+    // the next byte boundary Ã¢â‚¬? that's 8*(8-n) bits when n<8).
     for _ in n..8 {
       r.read_bits(2)?;
     }
@@ -551,7 +551,7 @@ mod tests {
       "./dssad_data/RSK/VIN_CN-DSSAD_20000105_053651_1_1_3.ts",
     );
     if !src.exists() {
-      eprintln!("skipping â€? sample file missing");
+      eprintln!("skipping  sample file missing");
       return;
     }
     let dst = PathBuf::from("/tmp/test_output.mp4");
