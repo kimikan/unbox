@@ -1,0 +1,48 @@
+name: Multi-Platform Build (Ubuntu 18 & Windows)
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # 编译 Windows 程序
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: windows-program
+            path: target/release/*.exe
+          
+          # 编译兼容 Ubuntu 18 的 Linux 程序
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            artifact_name: ubuntu18-compatible-program
+            path: target/release/unbox # ⚠️请把“你的程序名”替换为你的 Cargo.toml 里的 name
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 针对 Linux 环境安装老版本 glibc 工具链，确保能在 Ubuntu 18 运行
+      - name: Install Rust & Target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+
+      # 如果是 Linux 编译，利用特殊的链接器参数来最大化兼容老系统（如 Ubuntu 18）
+      - name: Configure Linux LDFLAGS
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          echo "RUSTFLAGS=-C link-arg=-Wl,--strip-all" >> $GITHUB_ENV
+
+      - name: Build Release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      # 将编译产物归档并上传到 GitHub 网页
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: target/${{ matrix.target }}/release/${{ matrix.os == 'windows-latest' && '*.exe' || 'unbox' }}
